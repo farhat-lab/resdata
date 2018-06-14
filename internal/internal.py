@@ -6,6 +6,8 @@ import sys
 
 sys.path.insert(0,'./')
 from utils.critical_concentrations_who import *
+from utils.tables import write_table
+
 
 def recursive_defaultdict():
     return defaultdict(recursive_defaultdict)
@@ -35,7 +37,8 @@ details={
         "GATI":"GATIFLOXACIN",
         "AMOXCLAV":"AMOXICILLIN_CLAVULANATE",
         "LIN":"LINEZOLID",
-    }
+    },
+    "fields":["xref", "tags", "antb", "exp_type", "conc", "conc_units", "mic_summary", "mic_conc_tested", "res_class", "method", "media", "device", "doi", "who_compliant", "crit_conc"]
 }
 
 def resolve_aliases(table_mic_data: str, table_strain_identification: str):
@@ -270,10 +273,11 @@ def parse_rows_take_decisions(list_rows_table, file_out, csv_critical_conc):
         print("* {}: {}".format(reason,reasons_discarded[reason]))
     return(list_discarded)
 
-(d_corresp,list_ids_ok, list_ids_not_matched,list_ids_missing_from_genomic_data)=resolve_aliases("../jupyter/sources/resistance_data/Resistance_data_internal_strains-20180514.tsv", "/home/lf61/mfarhat/rollingDB/tables/table_strain_identification_data6.tsv")
+(d_corresp,list_ids_ok, list_ids_not_matched,list_ids_missing_from_genomic_data)=resolve_aliases("./sources/resistance_data/Resistance_data_internal_strains-20180514.tsv", "/home/lf61/mfarhat/rollingDB/tables/table_strain_identification_data6.tsv")
 dat=build_table("../jupyter/sources/resistance_data/Resistance_data_internal_strains-20180514.tsv",details,list_ids_ok,d_corresp)
-discarded=parse_rows_take_decisions(dat,"./internal/internal.res","/n/data1/hms/dbmi/farhat/rollingDB/tables/jupyter/sources/critical_concentrations/criticalConcentrations.csv")
-for entry in discarded:
-    print(entry)
+write_table(dat,"./internal/internal.tsv",details["fields"])
+discarded=parse_rows_take_decisions(dat,"./internal/internal.res","./sources/critical_concentrations/criticalConcentrations.csv")
+#for entry in discarded:
+#    print(entry)
 
 
