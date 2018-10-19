@@ -2,10 +2,15 @@
 import csv
 import re
 import requests
+import sys
+
+sys.path.insert(0,'./')
+from utils.tables import write_table
 
 details={
     "antb":["AMIKACIN","CAPREOMYCIN","CIPROFLOXACIN","CYCLOSERINE","ETHAMBUTOL","ETHIOMIDE","ISONIAZID","KANAMYCIN","MOXIFLOXACIN","OFLOXACIN","PARA-AMINOSALISYLIC_ACID","PYRAZINAMIDE","RIFAMPICIN","STREPTOMYCIN"],
-    "def_res_class":{"0":"S","1":"R"}
+    "def_res_class":{"0":"S","1":"R"},
+    "fields":["xref", "tags", "antb", "exp_type", "conc", "conc_units", "mic_summary", "mic_conc_tested", "res_class", "method", "media", "device", "doi", "who_compliant", "crit_conc"]
 }
 
 def getNCBIIdType(my_id):
@@ -53,8 +58,8 @@ def build_table(table_strains,data):
                 #print(r.text)
                 continue
         for j in details["antb"]:
-        #entry: <xref> <tags> <antb> <exp_type> <conc> <conc_units> <mic_summary> <mic_conc_tested> <res_class> <method> <media> <device> <doi> <who_compliant>
-            entry=[""]*13
+        #entry: <xref> <tags> <antb> <exp_type> <conc> <conc_units> <mic_summary> <mic_conc_tested> <res_class> <method> <media> <device> <doi> <who_compliant> <crit_conc>
+            entry=[""]*14
             entry[0] = next(iter(set(biosamples)))
             # I define the antibiotic
             #I correct a mistake: ETHIOMIDE → ETHIONAMIDE
@@ -81,6 +86,8 @@ def parse_rows_take_decisions(list_rows_table, file_out):
         for row in list_rows_table:
             outf.write("{}\t{}\t{}\t{}\n".format(row[0],row[2],row[8],row[1]))
 
-rows=build_table("../jupyter/sources/resistance_data/Coll-et-al_2018_Nature-Genetics_s41588-017-0029-0.csv",details)
+
+rows=build_table("./sources/resistance_data/Coll-et-al_2018_Nature-Genetics_s41588-017-0029-0.csv",details)
+write_table(rows,"./Coll-et-al_2018_Nature-Genetics_s41588-017-0029-0/Coll-et-al_2018_Nature-Genetics_s41588-017-0029-0.tsv",details["fields"])
 parse_rows_take_decisions(rows, "./Coll-et-al_2018_Nature-Genetics_s41588-017-0029-0/Coll-et-al_2018_Nature-Genetics_s41588-017-0029-0.res")
 
