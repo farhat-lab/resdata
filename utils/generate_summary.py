@@ -65,7 +65,7 @@ def generate_summary_from_res(res_files: list,out_file) -> None:
     print("[INFO] I generated the report! ({})".format(out_file))
     return()
 
-def generate_summary_from_res_remove_collisions(res_files: list,out_file) -> None:
+def generate_summary_from_res_remove_collisions(res_files: list,out_file: str) -> None:
     """Takes a list of res files as input and builds a summary table for the resistance data (out_file). It checks for collisions and removes them"""
     #the format of a res file is: <biosample> <antb> <res_class> <tags>
     d_res_class=recursive_defaultdict()
