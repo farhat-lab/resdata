@@ -13,7 +13,7 @@ def recursive_defaultdict():
 
 details={
     "antb_conv":{
-
+        "PARA-AMINOSALICYLIC ACID":"PARA-AMINOSALICYLIC_ACID",
     }}
 
 def getNCBIIdType(my_id):
@@ -64,35 +64,27 @@ def build_table(table: str,data: dict) -> list:
         tag=i["STUDYID"]
         entry[1]=tag
         # main part to define the table
-        if tag in ["IS-1001","IS-1003"]:
+        if tag in ["IS-1001","IS-1003","IS-1004","IS-1005","IS-1008","IS-1013","IS-1017"]:
             res_class=i["MSORRES"]
             if res_class in ["ND","","-"]:
                 continue
             else:
                 entry[3]="DST"
                 entry[8]=res_class
+        elif tag in ["IS-1007"]:
+            if i["MSTESTCD"]=="DST":
+                res_class=i["MSORRES"]
+                if res_class in ["ND","","-"]:
+                    continue
+                else:
+                    entry[3]="DST"
+                    entry[8]=res_class
+            else:
+                continue
         else:
             print("[INFO] Unknown tag: {}".format(tag))
         # I need to get the biosample
-        if tag=="bryant2013":
-            entry[0]=i["Accession Number"]
-        else:
-            r = trace_request(db=getNCBIIdType(i["MSREFID"]), term=i["MSREFID"])
-            reader=csv.DictReader(r.iter_lines(decode_unicode=True))
-            biosamples=[]
-            for ent in reader:
-                try:
-                    #print(ent["BioSample"])
-                    biosamples.append(ent["BioSample"])
-                    if(len(set(biosamples))>1):
-                        print("[ERROR] More than one biosample for {} [tag: {}]. Skipping this NCBI ID".format(i["MSREFID"],tag))
-                        #print(r.text)
-                        continue
-                except:
-                    print("[ERROR] I  cannot find a biosample for {}".format(i["MSREFID"]))
-                    #print(r.text)
-                    continue
-            entry[0] = next(iter(set(biosamples)))
+        entry[0]=i["crossref_metadata_strains"]
         data_to_write.append(entry)
     #print("[INFO] {}/{} entries skipped ({:.1f}%)".format(entries_skipped,num_entries,entries_skipped/num_entries*100))
     return(data_to_write)
@@ -240,4 +232,3 @@ dat=build_table("../jupyter/sources/resistance_data/ReSeqTB_2018-01-25_2.csv",de
 discarded=parse_rows_take_decisions(dat,"./reseqtb/reseqtb.res","/n/data1/hms/dbmi/farhat/rollingDB/tables/jupyter/sources/critical_concentrations/criticalConcentrations.csv")
 for entry in discarded:
     print(entry)
-
