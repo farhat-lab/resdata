@@ -1,10 +1,15 @@
 ### Introduction
-This software package contains the scripts that were used to analyze resistance data from different sources and build a summary table
+This software package contains the scripts that were used to analyze resistance data from different sources and build a summary table with the AMR data.
 
 #### The raw data (raw resistance data and critical concentrations)
 The raw data are available on the directory ./sources.
 
-### How to generate the summary table of the resistance data
+### The summary table with the AMR data
+The summary table is available on the directory ./TABLES.
+
+### How to generate the summary table of the AMR data
+NOTE: you do not need to run the following scripts if you are just looking for the AMR data (see above). We provide the following scripts for the people that are interested in understanding the filtering steps we applied to get the final AMR data.
+
 You should run the scripts in each directory
 ```
 # Coll et al.
@@ -25,6 +30,7 @@ from utils.generate_summary import *
 
 generate_summary_from_res_remove_collisions(["./Coll-et-al_2018_Nature-Genetics_s41588-017-0029-0/Coll-et-al_2018_Nature-Genetics_s41588-017-0029-0.res","./internal/internal.res","curated_phenotypes/curated_phenotypes.res","./patric/patric.res","./reseqtb/reseqtb.res"],"summary_table_resistance-<version>.tsv")
 ```
+### Internal notes (Farhat lab members)
 
-NOTE: of course you need to increment the version number if you made some modifications to the scripts. The versioning works like that:
+NOTE: you need to increment the version number if you made some modifications to the scripts. The versioning works like that:
 * X.Y: increment X if you add a new set of strains with resistance_data; increment Y if you improve the quality of the current data set of strains.
