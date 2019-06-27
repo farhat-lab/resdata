@@ -272,8 +272,8 @@ def parse_rows_take_decisions(list_rows_table, file_out, csv_critical_conc):
     return(list_discarded)
 
 
-dat=build_table("../jupyter/sources/resistance_data/CuratedPhenotypesUpdated_2018-05-14.csv",details)
-discarded=parse_rows_take_decisions(dat,"./curated_phenotypes/curated_phenotypes.res","/n/data1/hms/dbmi/farhat/rollingDB/tables/jupyter/sources/critical_concentrations/criticalConcentrations.csv")
+dat=build_table("./sources/resistance_data/CuratedPhenotypesUpdated_2018-05-14.csv",details)
+discarded=parse_rows_take_decisions(dat,"./curated_phenotypes/curated_phenotypes.res","./sources/critical_concentrations/criticalConcentrations.csv")
 for entry in discarded:
     print(entry)
 
