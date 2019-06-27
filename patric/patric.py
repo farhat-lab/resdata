@@ -3,21 +3,49 @@ import csv
 import glob
 import os
 import re
+import requests
+
+def trace_request(**kw):
+    request = "http://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?save=efetch&db={db}&rettype=runinfo&term={term}".format(**kw)
+    response = requests.get(url=request,stream=True)
+    response.encoding = 'utf-8'
+    return response
 
 details={
-    "def_res_class":{"Susceptible":"S","Resistant":"R"}
+    "def_res_class":{"Susceptible":"S","Resistant":"R"},
+    "fields":["xref", "tags", "antb", "exp_type", "conc", "conc_units", "mic_summary", "mic_conc_tested", "res_class", "method", "media", "device", "doi", "who_compliant", "crit_conc"]
 }
 
 def build_table(table_corresp,dir_tables_res_data,data):
     dict_corresp={}
     inp = csv.DictReader(open(table_corresp,"r"),delimiter=",",quotechar='"')
     ids_without_biosample={}
-    for i in inp:
+    for x,i in enumerate(inp):
+        print("\r* Getting the biosample for the the Genome ID no. {}".format(x),end='')
         biosample=i["BioSample Accession"]
         if biosample=="":
-            ids_without_biosample[i["Genome ID"]]=1
+            r = trace_request(db="biosample", term=i["Genome Name"])
+            reader=csv.DictReader(r.iter_lines(decode_unicode=True))
+            biosamples=[]
+            #print(">{}".format(i["Genome Name"]))
+            for entry in reader:
+                try:
+                    biosamples.append(entry["BioSample"])
+                    if(len(set(biosamples))>1):
+                        # more than one biosample
+                        ids_without_biosample[i["Genome ID"]]=1
+                        break
+                except:
+                    break
+            if((len(set(biosamples))==0)):
+                # no biosample found
+                ids_without_biosample[i["Genome ID"]]=1
+                continue
+            dict_corresp[i["Genome ID"]]=next(iter(set(biosamples)))
+            #print(next(iter(set(biosamples))))
         else:
             dict_corresp[i["Genome ID"]]=biosample
+    print("")
     print("* [INFO] There are {} isolates with a biosample.".format(len(dict_corresp.keys())))
     print("* [WARNING] There are {} isolates without a biosample. They will be discarded.".format(len(ids_without_biosample.keys())))
     files_to_parse=glob.glob(dir_tables_res_data+"/PATRIC_amr*")
@@ -32,7 +60,7 @@ def build_table(table_corresp,dir_tables_res_data,data):
             entry=[""]*13
             if not i["Genome ID"] in dict_corresp:
                 count_discarded+=1
-                print(i)
+                #print(i)
                 continue
             if i["Resistant Phenotype"]=="" or i["Resistant Phenotype"]=="Intermediate":
                 continue
@@ -112,7 +140,7 @@ def build_table(table_corresp,dir_tables_res_data,data):
             if i["Laboratory Typing Method"]=="Computational Prediction":
                 continue
             data_to_write.append(entry)
-    print("* [INFO] total_count_entries={}; discarded={}".format(count_total_entries,count_discarded))
+    print("* [INFO] total_count_entries={}; discarded={} ({:.1f}%)".format(count_total_entries,count_discarded,count_discarded/count_total_entries*100))
     return(data_to_write)
 
 def parse_rows_take_decisions(list_rows_table, file_out):
@@ -123,5 +151,5 @@ def parse_rows_take_decisions(list_rows_table, file_out):
                 outf.write("{}\t{}\t{}\t{}\n".format(row[0],row[2],row[8],row[1]))
 
 rows=build_table("/home/lf61/mfarhat/rollingDB/tables/jupyter/sources/resistance_data/patric/PATRIC_genome.csv","/home/lf61/mfarhat/rollingDB/tables/jupyter/sources/resistance_data/patric/",details)
+write_table(dat,"./patric/patric.tsv",details["fields"])
 parse_rows_take_decisions(rows, "./patric/patric.res")
-

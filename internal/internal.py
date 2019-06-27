@@ -42,7 +42,7 @@ details={
 }
 
 def resolve_aliases(table_mic_data: str, table_strain_identification: str):
-    """Takes a """
+    """Takes the table with the antbiotic resistance data and the table with the strain identification strains. Returns """
     dict_aliases=recursive_defaultdict()
     dict_corresp=recursive_defaultdict()
     # I get the IDs of the internal strains present on the table_strain_identification
@@ -177,7 +177,7 @@ def parse_rows_take_decisions(list_rows_table, file_out, csv_critical_conc):
                         reasons_discarded["no_media_method"]+=1
                         continue
                     who_threshold=thresholds[row[2]][medium]
-                    if inf_lim > who_threshold:
+                    if inf_lim >= who_threshold:
                         outf.write("{}\t{}\t{}\t{}\n".format(row[0],row[2],"R",row[1]))
                     elif sup_lim <= who_threshold:
                         outf.write("{}\t{}\t{}\t{}\n".format(row[0],row[2],"S",row[1]))
@@ -185,6 +185,7 @@ def parse_rows_take_decisions(list_rows_table, file_out, csv_critical_conc):
                         count_discarded+=1
                         list_discarded.append(row)
                         reasons_discarded["conc_tested_not_allows_decision"]+=1
+                        #print(row)
                 elif res_great_eq_than:
                     #print("great_eq_than: {}".format(row[6]))
                     lim=float((res_great_eq_than[0]))
@@ -204,6 +205,7 @@ def parse_rows_take_decisions(list_rows_table, file_out, csv_critical_conc):
                         count_discarded+=1
                         list_discarded.append(row)
                         reasons_discarded["conc_tested_not_allows_decision"]+=1
+                        #print(row)
                 elif res_great_than:
                     #print("great_than: {}".format(row[6]))
                     lim=float((res_great_than[0]))
@@ -223,6 +225,7 @@ def parse_rows_take_decisions(list_rows_table, file_out, csv_critical_conc):
                         count_discarded+=1
                         list_discarded.append(row)
                         reasons_discarded["conc_tested_not_allows_decision"]+=1
+                        #print(row)
                 elif res_less_than:
                     #print("less_than: {}".format(row[6]))
                     lim=float((res_less_than[0]))
@@ -242,6 +245,7 @@ def parse_rows_take_decisions(list_rows_table, file_out, csv_critical_conc):
                         count_discarded+=1
                         list_discarded.append(row)
                         reasons_discarded["conc_tested_not_allows_decision"]+=1
+                        #print(row)
                 elif res_numb:
                     #print("numb: {}".format(row[6]))
                     lim=float((res_numb[0]))
@@ -263,6 +267,7 @@ def parse_rows_take_decisions(list_rows_table, file_out, csv_critical_conc):
                         count_discarded+=1
                         list_discarded.append(row)
                         reasons_discarded["conc_tested_not_allows_decision"]+=1
+                        #print(row)
                 else:
                     reasons_discarded["new_regex_needed"]+=1
                     list_discarded.append(row)
@@ -273,11 +278,9 @@ def parse_rows_take_decisions(list_rows_table, file_out, csv_critical_conc):
         print("* {}: {}".format(reason,reasons_discarded[reason]))
     return(list_discarded)
 
-(d_corresp,list_ids_ok, list_ids_not_matched,list_ids_missing_from_genomic_data)=resolve_aliases("./sources/resistance_data/Resistance_data_internal_strains-20180514.tsv", "/home/lf61/mfarhat/rollingDB/tables/table_strain_identification_data6.tsv")
+(d_corresp,list_ids_ok, list_ids_not_matched,list_ids_missing_from_genomic_data)=resolve_aliases("./sources/resistance_data/Resistance_data_internal_strains-20180514.tsv", "/home/lf61/mfarhat/rollingDB/tables/table_strain_identification_data8.tsv")
 dat=build_table("../jupyter/sources/resistance_data/Resistance_data_internal_strains-20180514.tsv",details,list_ids_ok,d_corresp)
 write_table(dat,"./internal/internal.tsv",details["fields"])
 discarded=parse_rows_take_decisions(dat,"./internal/internal.res","./sources/critical_concentrations/criticalConcentrations.csv")
-#for entry in discarded:
+#for entry in list_ids_not_matched:
 #    print(entry)
-
-
